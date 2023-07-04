@@ -4,6 +4,7 @@ from .forms import formPrincipal
 
 # Create your views here.
 def teste(request): 
-    form = formPrincipal
-    context = {"form": form}
-    return render(request, 'form.html', context)
+    if request.method == 'GET':
+        form = formPrincipal
+        context = {"form": form}
+        return render(request, 'form.html', context)
