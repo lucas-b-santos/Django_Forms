@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .forms import formPropriedade, formProprietario
+from .forms import formPrincipal
 
 # Create your views here.
 def teste(request): 
-    return HttpResponse('Aqui vai ter o formulario!!')
+    form = formPrincipal
+    context = {"form": form}
+    return render(request, 'form.html', context)

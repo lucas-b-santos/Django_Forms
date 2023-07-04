@@ -1,14 +1,8 @@
-from django import forms
-from .models import Propriedade, Proprietario
+from django.forms import ModelForm
+from .models import Dados
 
-class formProprietario(forms.ModelForm):
+class formPrincipal(ModelForm):
     class Meta:
-        model = Proprietario
-        fields = '__all__'
-
-class formPropriedade(forms.ModelForm):
-    class Meta:
-        model = Propriedade
-        fields = '__all__'
-        exclude = ['proprietario']
+        model = Dados
+        fields = "__all__"
 

@@ -6,6 +6,9 @@
     <title>Formulario - Propriedade</title>
 </head>
 <body>
-    
+    <form action="{% url 'input' %}" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </form>
 </body>
 </html>
