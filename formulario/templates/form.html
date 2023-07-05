@@ -15,14 +15,22 @@
 
 <body>
 
-    <div class="container">
-        <form action="{% url 'input' %}" method="POST">
-            {% csrf_token %}
-            {{form.as_p}}
-            
-            
-        </form>
-    </div>
+<div class="container mt-3">
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form%}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{field}}
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-success">Enviar</button>
+        </div>
+      </form>
+</div>
+
 
 
 
