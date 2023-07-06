@@ -15,25 +15,22 @@
 
 <body>
 
-<div class="container mt-3">
-    <form method="post">
-        {% csrf_token %}
-
-        {% for field in form%}
-        <div class="form-group">
-            {{ field.label_tag }}
-            {{field}}
-        </div>
-        {% endfor %}
-        <div class="d-flex justify-content-center">
-            <button type="submit" class="btn btn-success">Enviar</button>
-        </div>
-      </form>
-</div>
-
-
-
-
+    <div class="d-lg-flex justify-content-center">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form%}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{field}}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+            <div class="d-flex justify-content-center mb-3">
+                <button type="submit" class="btn btn-success">Enviar</button>
+            </div>
+        </form>
+    </div>
+    
 </body>
 
 </html>
