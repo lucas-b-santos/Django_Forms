@@ -1,31 +1,38 @@
 from django import forms
-from .models import Proprietario
+from .models import Dados
 from django.forms.widgets import NumberInput
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 import datetime
+import re
 
-class formProprietario(forms.ModelForm):
+
+
+
+
+class formPrincipal(forms.ModelForm):
     # Esse construtor eu uso para passar atributos do HTML para os inputs do form gerado
     #O atributo type não dá pra alterar aqui, altero via widgets
     def __init__(self, *args, **kwargs):
-        super(formProprietario, self).__init__(*args, **kwargs)
+        super(formPrincipal, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'}) #<- dicionario com cada atributo e seu respectivo valor desejado
+            
 
     class Meta:
-        model = Proprietario
+        model = Dados
         fields = "__all__"
         widgets = {
             'data_nascimento':NumberInput(attrs={'type': 'date','max': datetime.date.today()}),
         }
-    
+
 
     def clean(self):
         cleaned_data = super().clean()
 
     def clean_nome(self):
         data = self.cleaned_data['nome']
+        raise ValidationError("TESTE")
         return data
 
     def clean_rg(self):
