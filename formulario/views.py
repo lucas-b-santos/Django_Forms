@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import formPrincipal
+from django.core.exceptions import ValidationError
+
 
 
 # Create your views here.
@@ -23,11 +25,8 @@ def teste(request):
             else:
                 initial[field] = form.cleaned_data[field]
 
-        initial['data_nascimento'] = None
-        print(initial)
-        formLimpo = formPrincipal(initial=initial)
-
-        context = {"form": formLimpo}
+        form.data = initial
+        context = {"form": form}
         return render(request, 'form.html', context) 
         
 
