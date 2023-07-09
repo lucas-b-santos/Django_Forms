@@ -1,2 +1,2 @@
 # Django_Forms
-Estudando os forms Django
+Projeto de formulário para uso geral
