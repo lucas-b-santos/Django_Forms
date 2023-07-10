@@ -6,24 +6,30 @@ from django.utils.translation import gettext_lazy as _
 import datetime
 import re
 
+MANTER_MASCARA = True
 
-
-
+def remove_char(string):
+    removed_chars = '.-/()'
+    s = string
+    chars = '[%s]+' % re.escape(removed_chars)
+    return re.sub(chars, '', s)
 
 class formPrincipal(forms.ModelForm):
-    # Esse construtor eu uso para passar atributos do HTML para os inputs do form gerado
-    #O atributo type não dá pra alterar aqui, altero via widgets
+    # Construtor usado para alterar as classes HTML para os inputs do form gerado
     def __init__(self, *args, **kwargs):
         super(formPrincipal, self).__init__(*args, **kwargs)
         for field in self.fields:
+
             self.fields[field].widget.attrs.update({'class': 'form-control'}) #<- dicionario com cada atributo e seu respectivo valor desejado
-            
+
 
     class Meta:
         model = Dados
         fields = "__all__"
         widgets = {
-            'data_nascimento':NumberInput(attrs={'type': 'date','max': datetime.date.today()}),
+            'data_nascimento':NumberInput(attrs={'type': 'date','max': datetime.date.today()}),#limita a data do input para o dia de hoje
+            'data_inicial':NumberInput(attrs={'type': 'date','min': datetime.date.today()}),
+            'data_final':NumberInput(attrs={'type': 'date','min': datetime.date.today()}),
         }
 
 
@@ -32,7 +38,6 @@ class formPrincipal(forms.ModelForm):
 
     def clean_nome(self):
         data = self.cleaned_data['nome']
-        raise ValidationError("TESTE")
         return data
 
     def clean_rg(self):
@@ -41,7 +46,17 @@ class formPrincipal(forms.ModelForm):
 
     def clean_cpf_cnpj(self):
         data = self.cleaned_data['cpf_cnpj']
-        return data
+        if MANTER_MASCARA:
+            if len(data) == 14 or len(data) == 18:
+                return data
+            else: 
+                raise ValidationError(_("Favor digitar corretamente os dados!"))
+        else:
+            if len(data) == 14 or len(data) == 18:
+                return remove_char(data)
+            else: 
+                raise ValidationError(_("Favor digitar corretamente os dados!"))
+
 
     def clean_telefone(self):
         data = self.cleaned_data['telefone']

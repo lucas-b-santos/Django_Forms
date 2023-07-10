@@ -7,30 +7,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario</title>
-
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-
-
 </head>
 
 <body>
 
-    <div class="d-flex justify-content-center">
-            <form method="post">
-                {% csrf_token %}
-                {% for field in form%}
-                <div class="form-group row">
-                    {{ field.label_tag }}
-                    {{field}}
-                    {{ field.errors }}
-                </div>
-                {% endfor %}
-                <div class="d-flex justify-content-center mb-3">
-                    <button type="submit" class="btn btn-success">Enviar</button>
-                </div>
-            </form>
+    <div class="container-fluid">
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row justify-content-center mt-3">
+                    {% for field in form%}
+                        <div class="col-3 form-group">
+                            {{ field.label_tag }}            
+                            {{field}}
+                            {{ field.errors }}
+                        </div>
+                     {% endfor %}             
+            </div>
+
+            <div class="d-flex justify-content-center mb-3">
+                <button type="submit" class="btn btn-success">Enviar</button>
+            </div>
+        </form>
     </div>
-    
+
 </body>
+
+<script src="{% static 'js/code.jquery.com_jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/jquery.mask.min.js' %}"></script>
+<script src="{% static 'js/mascaras.js' %}"></script>
 
 </html>
