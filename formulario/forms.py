@@ -12,7 +12,8 @@ MIN_LENGTH_CAMPOS = {
     'rg': '12',
     'cpf_cnpj':'14', 
     'telefone':'15',
-    'cep':'9'
+    'cep':'9',
+    'estado':'2',
 }
 
 def remove_char(string):
@@ -26,7 +27,7 @@ class formPrincipal(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(formPrincipal, self).__init__(*args, **kwargs)
         for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'}) #<- dicionario com cada atributo e seu respectivo valor desejado
+            self.fields[field].widget.attrs.update({'class': 'form-control'})#<- dicionario com cada atributo e seu respectivo valor desejado
             if field in MIN_LENGTH_CAMPOS:
                 self.fields[field].widget.attrs.update({'minlength': MIN_LENGTH_CAMPOS[field]})
 

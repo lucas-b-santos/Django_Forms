@@ -1,4 +1,11 @@
-var campos_validos = true;
+var camposValidos = true;
+
+var tamanhoCampos = {
+  'rg':12,
+  'cpf_cnpj':[14, 18],
+  'telefone':15,
+  'cep':9
+}
 
 $(document).ready(function () {
   'use strict';
@@ -38,12 +45,16 @@ $(document).ready(function () {
       event.stopPropagation();
 
       for(var i = 0; i < form.length; i++){
-        console.log(form[i].getAttribute("id"));
-      };
+        if (form[i].getAttribute("minlength") === form[i].value.length) {
+          form[i].classList.add('is-valid');
+        } else {
+          form[i].classList.add('is-invalid');
+        }
+      }
       // if (form.checkValidity() === false) {
 
       // }
-      form.classList.add('was-validated');
+      // form.classList.add('was-validated');
     }, false);
   });
 
