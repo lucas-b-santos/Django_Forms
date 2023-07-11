@@ -14,7 +14,7 @@
 
     <div class="container-fluid">
         
-        <form method="post">
+        <form method="post" class="needs-validation">
             {% csrf_token %}
 
             <div class="row justify-content-center mt-3">
@@ -23,6 +23,9 @@
                             {{ field.label_tag }}            
                             {{field}}
                             {{ field.errors }}
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
                         </div>
                      {% endfor %}             
             </div>
@@ -31,12 +34,14 @@
                 <button type="submit" class="btn btn-success">Enviar</button>
             </div>
         </form>
-    </div>
+        
 
 </body>
 
 <script src="{% static 'js/code.jquery.com_jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'js/cdn.jsdelivr.net_npm_popper.js@1.12.9_dist_umd_popper.min.js' %}"></script>
+<script src="{% static 'js/cdn.jsdelivr.net_npm_bootstrap@4.0.0_dist_js_bootstrap.min.js' %}"></script>
 <script src="{% static 'js/jquery.mask.min.js' %}"></script>
-<script src="{% static 'js/mascaras.js' %}"></script>
+<script src="{% static 'js/main-script.js' %}"></script>
 
 </html>

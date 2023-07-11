@@ -7,11 +7,11 @@ class Dados(models.Model):
     cpf_cnpj = models.CharField(max_length=18, unique=True, verbose_name='CPF/CNPJ')
     telefone = models.CharField(max_length=15)
     data_nascimento = models.DateField()
-    cep = models.CharField(max_length=12, default=None, verbose_name='CEP')
+    cep = models.CharField(max_length=9, default=None, verbose_name='CEP')
     logradouro = models.CharField(max_length=15, default=None)
     bairro = models.CharField(max_length=15, default=None)
     cidade = models.CharField(max_length=12, default=None )
-    estado = models.CharField(max_length=12, default=None)
+    estado = models.CharField(max_length=2, default=None)
     data_inicial = models.DateField(default=None)
     data_final = models.DateField(default=None)
 

@@ -8,6 +8,13 @@ import re
 
 MANTER_MASCARA = True
 
+MIN_LENGTH_CAMPOS = {
+    'rg': '12',
+    'cpf_cnpj':'14', 
+    'telefone':'15',
+    'cep':'9'
+}
+
 def remove_char(string):
     removed_chars = '.-/()'
     s = string
@@ -19,8 +26,9 @@ class formPrincipal(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(formPrincipal, self).__init__(*args, **kwargs)
         for field in self.fields:
-
             self.fields[field].widget.attrs.update({'class': 'form-control'}) #<- dicionario com cada atributo e seu respectivo valor desejado
+            if field in MIN_LENGTH_CAMPOS:
+                self.fields[field].widget.attrs.update({'minlength': MIN_LENGTH_CAMPOS[field]})
 
 
     class Meta:
@@ -46,16 +54,17 @@ class formPrincipal(forms.ModelForm):
 
     def clean_cpf_cnpj(self):
         data = self.cleaned_data['cpf_cnpj']
-        if MANTER_MASCARA:
-            if len(data) == 14 or len(data) == 18:
-                return data
-            else: 
-                raise ValidationError(_("Favor digitar corretamente os dados!"))
-        else:
-            if len(data) == 14 or len(data) == 18:
-                return remove_char(data)
-            else: 
-                raise ValidationError(_("Favor digitar corretamente os dados!"))
+        # if MANTER_MASCARA:
+        #     if len(data) == 14 or len(data) == 18:
+        #         return data
+        #     else: 
+        #         raise ValidationError(_("Favor digitar corretamente os dados!"))
+        # else:
+        #     if len(data) == 14 or len(data) == 18:
+        #         return remove_char(data)
+        #     else: 
+        #         raise ValidationError(_("Favor digitar corretamente os dados!"))
+        return data
 
 
     def clean_telefone(self):

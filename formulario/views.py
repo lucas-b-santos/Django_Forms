@@ -10,7 +10,7 @@ def teste(request):
     else:
         form = formPrincipal(request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
+            print('FORM VÁLIDO!!!')
 
         data = {}
 
