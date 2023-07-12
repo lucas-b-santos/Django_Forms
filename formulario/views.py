@@ -2,10 +2,22 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import formPrincipal
 
+validacaoJS = {
+    'rg':"Favor informar um RG válido!",
+    'cpf_cnpj':"Favor informar um CPF/CNPJ válido!",
+    'telefone':"Favor informar um telefone válido!",
+    'cep':"Favor informar um CEP válido!",
+    'estado':"Favor informar um estado válido!",
+}
+
 def teste(request): 
     if request.method == 'GET':
         form = formPrincipal
-        context = {"form": form}
+        for field in form.base_fields:
+            if field not in validacaoJS:
+                validacaoJS[field] = "Preencha este campo."
+
+        context = {"form": form, "mensagens_JS":validacaoJS}
         return render(request, 'form.html', context)
     else:
         form = formPrincipal(request.POST)
