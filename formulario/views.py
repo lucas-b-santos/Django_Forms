@@ -33,7 +33,7 @@ def teste(request):
                 data[field] = form.cleaned_data[field]            
 
         form.data = data
-        context = {"form": form}
+        context = {"form": form, "mensagens_JS":validacaoJS}
         return render(request, 'form.html', context) 
         
 
