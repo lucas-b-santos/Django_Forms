@@ -2,22 +2,25 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import formPrincipal
 
-validacaoJS = {
-    'rg':"Favor informar um RG válido!",
-    'cpf_cnpj':"Favor informar um CPF/CNPJ válido!",
-    'telefone':"Favor informar um telefone válido!",
-    'cep':"Favor informar um CEP válido!",
-    'estado':"Favor informar um estado válido!",
+ERROR_MSG = {
+    'nome':'Informe um nome válido!', 
+    'logradouro':'Informe um logradouro válido!', 
+    'bairro':'Informe um bairro válido!', 
+    'cidade':'Informe uma cidade válida!', 
+    'rg':"Informe um RG válido!",
+    'cpf_cnpj':"Informe um CPF/CNPJ válido!",
+    'telefone':"Informe um telefone válido!",
+    'cep':"Informe um CEP válido!",
+    'uf':"Informe um estado válido!",
+    'data_nascimento':"Informe uma data de nascimento válida!",
+    'data_inicial':"Informe uma data inicial válida!",
+    'data_final':"Informe uma data final válida!",
 }
 
 def teste(request): 
     if request.method == 'GET':
         form = formPrincipal
-        for field in form.base_fields:
-            if field not in validacaoJS:
-                validacaoJS[field] = "Preencha este campo."
-
-        context = {"form": form, "mensagens_JS":validacaoJS}
+        context = {"form": form, "mensagens_JS":ERROR_MSG}
         return render(request, 'form.html', context)
     else:
         form = formPrincipal(request.POST)
@@ -33,7 +36,7 @@ def teste(request):
                 data[field] = form.cleaned_data[field]            
 
         form.data = data
-        context = {"form": form, "mensagens_JS":validacaoJS}
+        context = {"form": form, "mensagens_JS":ERROR_MSG}
         return render(request, 'form.html', context) 
         
 
