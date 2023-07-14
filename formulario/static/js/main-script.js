@@ -131,24 +131,6 @@ $(document).ready(function () {
 
   $('#id_cpf_cnpj').mask(cpfCnpjMaskBehavior, cpfCnpjOptions);
 
-  let cep_valido = true;
-
-  $("#id_cep").addEventListener('focusout', () => {
-      let valor = `https://viacep.com.br/ws/${$("#id_cep").value.replace(/\D/g, '')}/json/`
-      $.getJSON(valor, function(result){
-        if (result.erro) {
-          cep_valido = false;
-          return;
-        }
-        $("#id_logradouro").value = result.logradouro
-        $("#id_bairro").value = result.bairro
-        $("#id_cidade").value = result.localidade
-        $("#id_uf").value = result.uf
-        cep_valido = true;
-      });
-  })
-
-
   // Validação de campos client-side
   const form = document.querySelector('form');
   form.addEventListener('submit', function (event) {
@@ -158,11 +140,12 @@ $(document).ready(function () {
     }
 
     let formValido = true;
+    let cep_valido = false;
 
     for (let i = 0; i < form.length; i++) {
       if (form[i].getAttribute("id") === "id_cpf_cnpj") {
         if ([14, 18].includes(form[i].value.length) && (validarCPF(form[i].value) || validarCNPJ(form[i].value))) {
-          
+
           form[i].classList.add('is-valid');
         } else {
           form[i].classList.add('is-invalid');
@@ -170,11 +153,29 @@ $(document).ready(function () {
         }
       } else if (camposParaValidar.includes(form[i].getAttribute("id"))) {
         if (form[i].getAttribute("minlength") == form[i].value.length) {
-         if (form[i].getAttribute("id") == "id_cep") {
 
-         }
+          if (form[i].getAttribute("id") == "id_cep") {
+            form.id_cep.addEventListener('focusout', () => {
+              cep_valido = true;
+              console.log("FOCUS OUT!");
+              if (!cep_valido) {
+                return;
+              }
+              let valor = `https://viacep.com.br/ws/${$("#id_cep").value.replace(/\D/g, '')}/json/`
+              $.getJSON(valor, function (result) {
+                if (result.erro) {
+                  cep_valido = false;
+                  return;
+                }
+                form.id_logradouro.value = result.logradouro
+                form.id_bairro.value = result.bairro
+                form.id_cidade.value = result.localidade
+                form.id_uf.value = result.uf
+                cep_valido = true;
+              });
+            })
+          }
           form[i].classList.add('is-valid');
-         
         } else {
           form[i].classList.add('is-invalid');
           formValido = false;
