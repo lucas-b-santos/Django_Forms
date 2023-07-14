@@ -13,7 +13,7 @@ MIN_LENGTH_CAMPOS = {
     'cpf_cnpj':'14', 
     'telefone':'15',
     'cep':'9',
-    'estado':'2',
+    'uf':'2',
 }
 
 def remove_char(string):
@@ -80,8 +80,8 @@ class formPrincipal(forms.ModelForm):
         data = self.cleaned_data['cidade']
         return data
     
-    def clean_estado(self):
-        data = self.cleaned_data['estado']
+    def clean_uf(self):
+        data = self.cleaned_data['uf']
         return data
     
     def clean_pais(self):

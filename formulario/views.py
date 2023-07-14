@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import formPrincipal
 
-ERROR_MSG = {
+ERROR_MSGS = {
     'nome':'Informe um nome válido!', 
     'logradouro':'Informe um logradouro válido!', 
     'bairro':'Informe um bairro válido!', 
@@ -20,7 +20,7 @@ ERROR_MSG = {
 def teste(request): 
     if request.method == 'GET':
         form = formPrincipal
-        context = {"form": form, "mensagens_JS":ERROR_MSG}
+        context = {"form": form, "mensagens_JS":ERROR_MSGS}
         return render(request, 'form.html', context)
     else:
         form = formPrincipal(request.POST)
@@ -36,7 +36,7 @@ def teste(request):
                 data[field] = form.cleaned_data[field]            
 
         form.data = data
-        context = {"form": form, "mensagens_JS":ERROR_MSG}
+        context = {"form": form, "mensagens_JS":ERROR_MSGS}
         return render(request, 'form.html', context) 
         
 
