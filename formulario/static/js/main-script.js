@@ -79,10 +79,21 @@ function validarCPF(strCPF) {
 
   if (strCPF.length != 11) return false;
 
-  var Soma = 0;
-  var Resto;
+  let Soma = 0;
+  let Resto;
 
-  if (strCPF == "00000000000") return false;
+  // Elimina CPFs invalidos conhecidos
+  if (strCPF == "00000000000" ||
+  strCPF == "11111111111" ||
+  strCPF == "22222222222" ||
+  strCPF == "33333333333" ||
+  strCPF == "44444444444" ||
+  strCPF == "55555555555" ||
+  strCPF == "66666666666" ||
+  strCPF == "77777777777" ||
+  strCPF == "88888888888" ||
+  strCPF == "99999999999")
+    return false; 
 
   for (i = 1; i <= 9; i++) Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (11 - i);
   Resto = (Soma * 10) % 11;
@@ -99,11 +110,9 @@ function validarCPF(strCPF) {
   return true;
 }
 
-
 const camposParaValidar = [
   'id_rg',
   'id_telefone',
-  'id_cep',
 ] // campos que precisam de validação especial quanto ao tamanho do dado
 
 //Regex para validação de nomes (Pessoa, Estado, Bairro etc)
@@ -133,65 +142,81 @@ $(document).ready(function () {
 
   // Validação de campos client-side
   const form = document.querySelector('form');
+
+  let formValido = true;
+  let cepValido = false;
+  let enderecosJSON;
+
+  form.id_cep.addEventListener('input', () => {
+  console.log("INPUT!!");
+    form.id_cep.classList.remove("is-invalid");
+    form.id_cep.classList.remove("is-valid");
+
+    if (form.id_cep.value.length != 9) {
+      form.id_cep.classList.add("is-invalid");
+      return;
+    }
+    let valor = `https://viacep.com.br/ws/${form.id_cep.value.replace(/\D/g, '')}/json/`;
+    $.getJSON(valor, function (result) {
+      if (result.erro) {
+        cepValido = false;
+        form.id_cep.classList.add('is-invalid');
+        return;
+      }
+      cepValido = true;
+      form.id_cep.classList.add("is-valid");
+      enderecosJSON = result;
+      form.id_logradouro.value = result.logradouro;
+      form.id_bairro.value = result.bairro;
+      form.id_cidade.value = result.localidade;
+      form.id_uf.value = result.uf;
+    });
+  })
+
   form.addEventListener('submit', function (event) {
     for (let i = 0; i < form.length; i++) {
-      form[i].classList.remove("is-invalid");
-      form[i].classList.remove("is-valid");
+      if (!(form[i].getAttribute("id") == "id_cep")) {
+        form[i].classList.remove("is-invalid");
+        form[i].classList.remove("is-valid");
+      }
+
     }
 
-    let formValido = true;
-    let cep_valido = false;
+    formValido = true;
 
     for (let i = 0; i < form.length; i++) {
-      if (form[i].getAttribute("id") === "id_cpf_cnpj") {
-        if ([14, 18].includes(form[i].value.length) && (validarCPF(form[i].value) || validarCNPJ(form[i].value))) {
-
+      if (!form[i].value && form[i].hasAttribute("id")) {
+        $("div.invalid-feedback").html( "Preencha este campo.");
+        form[i].classList.add('is-invalid');
+        formValido = false;
+      } else if (form[i].getAttribute("id") === "id_cpf_cnpj") {
+        if (validarCPF(form[i].value) || validarCNPJ(form[i].value)) {
           form[i].classList.add('is-valid');
         } else {
+          if (!form[i].value) {
+            $("div.invalid-feedback").html( "Preencha este campo.");
+          } else {
+            $("div.invalid-feedback").html( "Informe um CPF/CNPJ válido!");
+          }
           form[i].classList.add('is-invalid');
           formValido = false;
         }
       } else if (camposParaValidar.includes(form[i].getAttribute("id"))) {
         if (form[i].getAttribute("minlength") == form[i].value.length) {
-
-          if (form[i].getAttribute("id") == "id_cep") {
-            form.id_cep.addEventListener('focusout', () => {
-              cep_valido = true;
-              console.log("FOCUS OUT!");
-              if (!cep_valido) {
-                return;
-              }
-              let valor = `https://viacep.com.br/ws/${$("#id_cep").value.replace(/\D/g, '')}/json/`
-              $.getJSON(valor, function (result) {
-                if (result.erro) {
-                  cep_valido = false;
-                  return;
-                }
-                form.id_logradouro.value = result.logradouro
-                form.id_bairro.value = result.bairro
-                form.id_cidade.value = result.localidade
-                form.id_uf.value = result.uf
-                cep_valido = true;
-              });
-            })
-          }
           form[i].classList.add('is-valid');
         } else {
           form[i].classList.add('is-invalid');
           formValido = false;
         }
       } else {
-        if (!form[i].value && form[i].hasAttribute("id")) {
-          form[i].classList.add('is-invalid');
-          formValido = false;
-        } else if (form[i].getAttribute("type") === "text" && !(form[i].getAttribute("id") === "id_logradouro")) {
+        if (form[i].getAttribute("type") === "text" && !(["id_cep", "id_logradouro"].includes(form[i].getAttribute("id")))) {
           if (regEx1.test(form[i].value) && regEx2.test(form[i].value)) {
             form[i].classList.add('is-valid');
           } else {
             form[i].classList.add('is-invalid');
             formValido = false;
           }
-        } else if (form[i].getAttribute("type") === "date") {
+        } else {
           let partesDataNasc = form.id_data_nascimento.value.split("-");
           let partesDataIni = form.id_data_inicial.value.split("-");
           let partesDataFinal = form.id_data_final.value.split("-");
@@ -223,10 +248,10 @@ $(document).ready(function () {
                 form[i].classList.add('is-valid');
               }
               break;
+            default:
+              form[i].classList.add('is-valid');
+              break;
           }
-
-        } else {
-          form[i].classList.add('is-valid');
         }
       }
     }
