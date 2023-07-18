@@ -27,7 +27,7 @@
                     <div class="valid-feedback">
                         OK!
                     </div>
-                    <div class="invalid-feedback">
+                    <div class="invalid-feedback" id="invalid-feedback-{{ field.html_name }}">
                         {% for key, value in mensagens_JS.items %}
                             {% if key == field.html_name %} 
                                 {{ value }}
