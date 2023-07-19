@@ -110,6 +110,14 @@ function validarCPF(strCPF) {
   return true;
 }
 
+const camposEndereco = [
+  'id_cep',
+  'id_logradouro',
+  'id_bairro',
+  'id_cidade',
+  'id_uf'
+]
+
 //Regex para validação de nomes (Pessoa, Estado, Bairro etc)
 const regEx1 = /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/
 const regEx2 = /^(?![ ])(?!.*[ ]{2})((?:e|da|do|das|dos|de|d'|D'|la|las|el|los)\s*?|(?:[A-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð'][^\s]*\s*?)(?!.*[ ]$))+$/;
@@ -139,61 +147,64 @@ $(document).ready(function () {
   const form = document.querySelector('form');
 
   let formValido = true;
-  let cepValido = false;
+  let cepValido = true;
   let enderecosJSON;
 
-  form.id_cep.addEventListener('input', () => {
-    console.log("INPUT!!");
-    form.id_cep.classList.remove("is-invalid");
-    form.id_cep.classList.remove("is-valid");      
-    form.id_logradouro.classList.remove("is-valid");
-    form.id_bairro.classList.remove("is-valid");
-    form.id_uf.classList.remove("is-valid");
-    form.id_cidade.classList.remove("is-valid");
-    form.id_logradouro.classList.remove("is-invalid");
-    form.id_bairro.classList.remove("is-invalid");
-    form.id_uf.classList.remove("is-invalid");
-    form.id_cidade.classList.remove("is-invalid");
 
-    if (form.id_cep.value.length != 9) {
-      $("#invalid-feedback-cep").html("Favor informar um CEP válido!");
-      form.id_cep.classList.add("is-invalid");
-      cepValido = false;
-      return;
-    }
-    let valor = `https://viacep.com.br/ws/${form.id_cep.value.replace(/\D/g, '')}/json/`;
-    $.getJSON(valor, function (result) {
+
+  async function pesquisaCEP() {
+    return new Promise(async resolve => {
+      console.log("FOCUSOUT!!");
+      for (let i = 0; i < form.length; i++) {
+        if (camposEndereco.includes(form[i].getAttribute("id"))) {
+          form[i].classList.remove("is-invalid");
+          form[i].classList.remove("is-valid");
+        }
+      }
+  
+      if (form.id_cep.value.length != 9) {
+        $("#invalid-feedback-cep").html("Informe um CEP válido!");
+        form.id_cep.classList.add("is-invalid");
+        cepValido = false;
+        resolve(false);
+      }
+  
+      const valor = await fetch(`https://viacep.com.br/ws/${form.id_cep.value.replace(/\D/g, '')}/json/`);
+      const result = await valor.json();
+  
       if (result.erro) {
         cepValido = false;
-        $("#invalid-feedback-cep").html("Favor informar um CEP válido!");
+        $("#invalid-feedback-cep").html("Informe um CEP válido!");
         form.id_cep.classList.add('is-invalid');
-        return;
+        resolve(false);
       }
       cepValido = true;
-      form.id_cep.classList.add("is-valid");
       enderecosJSON = result;
       form.id_logradouro.value = result.logradouro;
       form.id_bairro.value = result.bairro;
       form.id_cidade.value = result.localidade;
       form.id_uf.value = result.uf;
-      form.id_logradouro.classList.add("is-valid");
-      form.id_bairro.classList.add("is-valid");
-      form.id_uf.classList.add("is-valid");
-      form.id_cidade.classList.add("is-valid");
+      form.id_cep.classList.add('is-valid');
+      resolve(true);
 
     });
-  })
+  }
 
-  form.addEventListener('submit', function (event) {
+  form.id_cep.addEventListener('focusout', pesquisaCEP);
+
+  form.addEventListener('submit', async function (event) {
+
+    const pesquisou = await pesquisaCEP();
+    console.log(pesquisou);
+    console.log(enderecosJSON);
+    formValido = true;
+
     for (let i = 0; i < form.length; i++) {
-      if (!(form[i].getAttribute("id") == "id_cep")) {
+      if (form[i].getAttribute("id") != "id_cep") {
         form[i].classList.remove("is-invalid");
         form[i].classList.remove("is-valid");
       }
-
     }
-
-    formValido = true;
 
     for (let i = 0; i < form.length; i++) {
       if (!form[i].value && form[i].hasAttribute("id")) {
@@ -212,7 +223,7 @@ $(document).ready(function () {
             if (validarCPF(form[i].value) || validarCNPJ(form[i].value)) {
               form[i].classList.add('is-valid');
             } else {
-              $("#cpf_cnpj").html("Informe um CPF/CNPJ válido!");
+              $("#invalid-feedback-cpf_cnpj").html("Informe um CPF/CNPJ válido!");
               form[i].classList.add('is-invalid');
               formValido = false;
             }
