@@ -116,11 +116,10 @@ const camposEndereco = [
   'id_bairro',
   'id_cidade',
   'id_uf'
-]
+] //campos de endereco, necessitam validação especial
 
-//Regex para validação de nomes (Pessoa, Estado, Bairro etc)
-const regEx1 = /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/
-const regEx2 = /^(?![ ])(?!.*[ ]{2})((?:e|da|do|das|dos|de|d'|D'|la|las|el|los)\s*?|(?:[A-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð'][^\s]*\s*?)(?!.*[ ]$))+$/;
+//Regex para validação de nomes (Pessoa, Estado, Bairro etc - permite apenas letras)
+const regEx = /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/
 
 $(document).ready(function () {
   'use strict';
@@ -146,60 +145,65 @@ $(document).ready(function () {
   // Validação de campos client-side
   const form = document.querySelector('form');
 
-  let formValido = true;
-  let cepValido = true;
-  let enderecosJSON;
+  let formValido = false;
+  let cepValido = false;
 
-
-
-  async function pesquisaCEP() {
+  //Async function para que o compilador aguarde o GET feito para buscar endereco na API
+  async function pesquisarCEP() {
     return new Promise(async resolve => {
-      console.log("FOCUSOUT!!");
       for (let i = 0; i < form.length; i++) {
         if (camposEndereco.includes(form[i].getAttribute("id"))) {
           form[i].classList.remove("is-invalid");
           form[i].classList.remove("is-valid");
         }
-      }
-  
+      } //retira as mensagens de validação do respectivo campo
+
       if (form.id_cep.value.length != 9) {
         $("#invalid-feedback-cep").html("Informe um CEP válido!");
         form.id_cep.classList.add("is-invalid");
         cepValido = false;
-        resolve(false);
+        resolve();
+        return;
       }
-  
-      const valor = await fetch(`https://viacep.com.br/ws/${form.id_cep.value.replace(/\D/g, '')}/json/`);
-      const result = await valor.json();
-  
-      if (result.erro) {
-        cepValido = false;
+
+      const valor = await fetch(`https://viacep.com.br/ws/${form.id_cep.value.replace(/\D/g, '')}/json/`); //busca pelo endereco na API
+      const result = await valor.json();//converte o valor para JSON
+
+      if (result.erro) {//retorna mensagem de erro se CEP inválido!!
         $("#invalid-feedback-cep").html("Informe um CEP válido!");
         form.id_cep.classList.add('is-invalid');
-        resolve(false);
+        cepValido = false;
+        resolve();
+        return;
       }
-      cepValido = true;
-      enderecosJSON = result;
+
+      // caso CEP válido, coloca o endereço nos campos e retorna feedback válido no form
       form.id_logradouro.value = result.logradouro;
       form.id_bairro.value = result.bairro;
       form.id_cidade.value = result.localidade;
       form.id_uf.value = result.uf;
       form.id_cep.classList.add('is-valid');
-      resolve(true);
+      cepValido = true;
+      resolve();
+      return;
 
     });
   }
 
-  form.id_cep.addEventListener('focusout', pesquisaCEP);
+  form.id_cep.addEventListener('focusout', pesquisarCEP);
 
   form.addEventListener('submit', async function (event) {
+    if (!formValido || !cepValido) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
-    const pesquisou = await pesquisaCEP();
-    console.log(pesquisou);
-    console.log(enderecosJSON);
+    //Aguarda a pesquisa pelo CEP
+    await pesquisarCEP();
+
     formValido = true;
 
-    for (let i = 0; i < form.length; i++) {
+    for (let i = 0; i < form.length; i++) {//retira todas as mensagens de feedback do form
       if (form[i].getAttribute("id") != "id_cep") {
         form[i].classList.remove("is-invalid");
         form[i].classList.remove("is-valid");
@@ -207,7 +211,7 @@ $(document).ready(function () {
     }
 
     for (let i = 0; i < form.length; i++) {
-      if (!form[i].value && form[i].hasAttribute("id")) {
+      if (!form[i].value && form[i].hasAttribute("id")) {//verifica campo vazio
         $("#invalid-feedback-" + form[i].getAttribute("id").slice(3)).html("Preencha este campo.");
         form[i].classList.add('is-invalid');
         formValido = false;
@@ -220,7 +224,7 @@ $(document).ready(function () {
         let dataFinal = new Date(partesDataFinal[0], partesDataFinal[1] - 1, partesDataFinal[2]);
         switch (form[i].getAttribute("id")) {
           case "id_cpf_cnpj":
-            if (validarCPF(form[i].value) || validarCNPJ(form[i].value)) {
+            if (validarCPF(form[i].value) || validarCNPJ(form[i].value)) {//valida CPF/CNPJ
               form[i].classList.add('is-valid');
             } else {
               $("#invalid-feedback-cpf_cnpj").html("Informe um CPF/CNPJ válido!");
@@ -229,7 +233,7 @@ $(document).ready(function () {
             }
             break;
           case "id_rg":
-            if (form[i].getAttribute("minlength") == form[i].value.length) {
+            if (form[i].getAttribute("minlength") == form[i].value.length) {//valida RG quanto ao tamanho
               form[i].classList.add('is-valid');
             } else {
               $("#invalid-feedback-rg").html("Informe um RG válido!");
@@ -238,7 +242,7 @@ $(document).ready(function () {
             }
             break;
           case "id_telefone":
-            if (form[i].getAttribute("minlength") == form[i].value.length) {
+            if (form[i].getAttribute("minlength") == form[i].value.length) {//valida telefone quanto ao tamanho
               form[i].classList.add('is-valid');
             } else {
               $("#invalid-feedback-telefone").html("Informe um telefone válido!");
@@ -247,7 +251,7 @@ $(document).ready(function () {
             }
             break;
           case "id_nome":
-            if (regEx1.test(form[i].value) && regEx2.test(form[i].value)) {
+            if (regEx.test(form[i].value)) {//valida nome (apenas letras)
               form[i].classList.add('is-valid');
             } else {
               $("#invalid-feedback-nome").html("Informe um nome válido! (apenas letras)");
@@ -256,7 +260,7 @@ $(document).ready(function () {
             }
             break;
           case "id_data_nascimento":
-            if (data > new Date()) {
+            if (data > new Date()) {//valida data de nascimento (deve ser menor que o data de hoje)
               $("#invalid-feedback-data_nascimento").html("Informe uma data de nascimento válida!");
               form[i].classList.add('is-invalid');
               formValido = false;
@@ -265,7 +269,7 @@ $(document).ready(function () {
             }
             break;
           case "id_data_inicial":
-            if (dataIni > dataFinal || dataIni < new Date()) {
+            if (dataIni > dataFinal || dataIni < new Date()) {//valida data inicial (deve ser menor que data final e maior que data de hoje)
               $("#invalid-feedback-data_inicial").html("Informe uma data inicial válida!");
               form[i].classList.add('is-invalid');
               formValido = false;
@@ -273,8 +277,9 @@ $(document).ready(function () {
               form[i].classList.add('is-valid');
             }
             break;
+
           case "id_data_final":
-            if (dataIni > dataFinal || dataFinal < new Date()) {
+            if (dataIni > dataFinal || dataFinal < new Date()) {//valida data de nascimento (deve ser maior que data inicial e maior que data de hoje)
               $("#invalid-feedback-data_final").html("Informe uma data final válida!");
               form[i].classList.add('is-invalid');
               formValido = false;
@@ -284,63 +289,39 @@ $(document).ready(function () {
             break;
 
           case "id_logradouro":
-            if (cepValido) {
-              if (form.id_logradouro.value.toUpperCase() != enderecosJSON.logradouro.toUpperCase()) {
-                $("#invalid-feedback-logradouro").html("CEP e logradouro não correspondem!");
-                form[i].classList.add('is-invalid');
-                formValido = false;
-              } else {
-                form[i].classList.add('is-valid');
-              }
-            } else {
-              $("#invalid-feedback-logradouro").html("Infome um CEP válido primeiro!");
+            if (!cepValido) {//valida data de nascimento (deve ser menor que o dia de hoje)
+              $("#invalid-feedback-logradouro").html("Informe um CEP válido primeiro!");
               form[i].classList.add('is-invalid');
               formValido = false;
+            } else {
+              form[i].classList.add('is-valid');
             }
             break;
           case "id_bairro":
-            if (cepValido) {
-              if (form.id_bairro.value.toUpperCase() != enderecosJSON.bairro.toUpperCase()) {
-                $("#invalid-feedback-bairro").html("CEP e bairro não correspondem!");
-                form[i].classList.add('is-invalid');
-                formValido = false;
-              } else {
-                form[i].classList.add('is-valid');
-              }
-            } else {
-              $("#invalid-feedback-bairro").html("Infome um CEP válido primeiro!");
+            if (!cepValido) {//valida data de nascimento (deve ser menor que o dia de hoje)
+              $("#invalid-feedback-bairro").html("Informe um CEP válido primeiro!");
               form[i].classList.add('is-invalid');
               formValido = false;
+            } else {
+              form[i].classList.add('is-valid');
             }
             break;
           case "id_cidade":
-            if (cepValido) {
-              if (form.id_cidade.value.toUpperCase() != enderecosJSON.localidade.toUpperCase()) {
-                $("#invalid-feedback-cidade").html("CEP e cidade não correspondem!");
-                form[i].classList.add('is-invalid');
-                formValido = false;
-              } else {
-                form[i].classList.add('is-valid');
-              }
-            } else {
-              $("#invalid-feedback-cidade").html("Infome um CEP válido primeiro!");
+            if (!cepValido) {//valida data de nascimento (deve ser menor que o dia de hoje)
+              $("#invalid-feedback-cidade").html("Informe um CEP válido primeiro!");
               form[i].classList.add('is-invalid');
               formValido = false;
+            } else {
+              form[i].classList.add('is-valid');
             }
             break;
           case "id_uf":
-            if (cepValido) {
-              if (form.id_uf.value.toUpperCase() != enderecosJSON.uf.toUpperCase()) {
-                $("#invalid-feedback-uf").html("CEP e UF não correspondem!");
-                form[i].classList.add('is-invalid');
-                formValido = false;
-              } else {
-                form[i].classList.add('is-valid');
-              }
-            } else {
-              $("#invalid-feedback-uf").html("Infome um CEP válido primeiro!");
+            if (!cepValido) {//valida data de nascimento (deve ser menor que o dia de hoje)
+              $("#invalid-feedback-uf").html("Informe um CEP válido primeiro!");
               form[i].classList.add('is-invalid');
               formValido = false;
+            } else {
+              form[i].classList.add('is-valid');
             }
             break;
 
@@ -352,10 +333,9 @@ $(document).ready(function () {
         }
       }
     }
-
-    if (!formValido) {
-      event.preventDefault();
-      event.stopPropagation();
+    if (formValido && cepValido) {//impede o envio do form caso seja inválido
+      form.submit();
+      return;
     }
   });
 });
