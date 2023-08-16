@@ -1,2 +1,2 @@
 # Django_Forms
-Projeto de formulário para uso geral
+Exemplo de formulário para uso geral
